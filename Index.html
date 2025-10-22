@@ -3,20 +3,31 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>ورشة TGD • أسماء + عجلة (Firebase RTDB)</title>
+<title>ورشة TGD • استقطاب بالأكواد + عجلة</title>
 <style>
   :root{--blue:#1e3a8a;--blue-100:#e8eefc;--brown:#8b5e34;--ink:#0f172a;--muted:#64748b;--bg:#f7f8fb;--card:#fff}
-  *{box-sizing:border-box} body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0;background:var(--bg);color:var(--ink)}
+  *{box-sizing:border-box}
+  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0;background:var(--bg);color:var(--ink)}
   header{background:linear-gradient(135deg,var(--blue) 0%, #2b4ab6 60%, var(--blue-100) 120%);color:#fff;padding:20px}
   .brand{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
   .brand h1{margin:0;font-size:20px;font-weight:800}.accent{color:var(--brown)}
-  main{max-width:1000px;margin:22px auto;padding:0 16px}
+  .tag{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.25);padding:4px 10px;border-radius:999px;font-size:12px}
+  .welcome{margin-top:8px;background:#fff1;border-left:4px solid #fff8;padding:8px 12px;border-radius:8px;backdrop-filter:blur(3px)}
+  main{max-width:1100px;margin:22px auto;padding:0 16px}
   .card{background:var(--card);border-radius:14px;box-shadow:0 10px 30px rgba(16,24,40,.06);padding:16px;margin-bottom:16px}
-  .row{display:flex;gap:16px;flex-wrap:wrap}.col{flex:1;min-width:280px}.center{text-align:center}
-  label{display:block;margin:6px 0} input[type=text]{width:100%;padding:12px;border:1px solid #e2e8f0;border-radius:10px}
-  .btn{cursor:pointer;border:0;border-radius:12px;padding:11px 16px;font-weight:800;background:var(--blue);color:#fff}
-  .btn:disabled{opacity:.5;cursor:not-allowed}.btn.secondary{background:#eaeaea;color:#222}.btn.danger{background:#ef4444}
-  .muted{color:var(--muted);font-size:13px} ul{list-style:none;margin:8px 0;padding:0} li{padding:8px 10px;border-bottom:1px dashed #eee}
+  .center{text-align:center}
+  .btn{cursor:pointer;border:0;border-radius:12px;padding:12px 16px;font-weight:800;background:var(--blue);color:#fff}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .btn.secondary{background:#eaeaea;color:#222}
+  .btn.danger{background:#ef4444}
+  .muted{color:var(--muted);font-size:13px}
+  .pill{display:inline-block;background:var(--blue-100);color:var(--blue);border:1px solid #c7d2fe;border-radius:999px;padding:4px 10px;font-size:12px}
+  .stack{display:flex;flex-direction:column;gap:12px;align-items:center}
+  .row{display:flex;gap:16px;flex-wrap:wrap}
+  .col{flex:1;min-width:280px}
+  .qr{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .qr-box{width:180px;height:180px;border:2px dashed #cbd5e1;border-radius:14px;display:flex;align-items:center;justify-content:center;background:#fff}
+  ul{list-style:none;margin:8px 0;padding:0} li{padding:8px 10px;border-bottom:1px dashed #eee}
   canvas{width:100%;max-width:520px;aspect-ratio:1/1;background:#fff;border-radius:50%;display:block;margin:auto;border:8px solid #fff;box-shadow:0 6px 20px rgba(0,0,0,.08)}
 </style>
 </head>
@@ -24,29 +35,46 @@
 <header>
   <div class="brand">
     <h1>أهلاً بكم <span class="accent">بورشة TGD</span></h1>
-    <span class="muted">أدخل اسمك ثم نعمل القرعة 🎯</span>
+    <span class="tag">استقطاب بالأكواد (QR) + عجلة اختيار اسم</span>
   </div>
+  <div class="welcome">ابدأ أولاً باستقطاب الأسماء عبر QR، ثم انتقل للعجلة بعد انضمام الطلاب.</div>
 </header>
 
 <main>
-  <!-- إدخال الأسماء (أول شاشة) -->
-  <section id="inputPanel" class="card">
+  <!-- صفحة الهبوط -->
+  <section id="landingPanel" class="card center">
+    <h2>ابدأ الاستقطاب</h2>
+    <div class="stack">
+      <button id="startCaptureBtn" class="btn">ابدأ استقطاب الأسماء (QR)</button>
+      <p class="muted">يتم إنشاء جلسة، عرض QR + رابط، وتجمع الأسماء حيًا.</p>
+    </div>
+  </section>
+
+  <!-- الاستقطاب -->
+  <section id="capturePanel" class="card" style="display:none">
     <div class="row">
       <div class="col">
-        <h2>1) أدخل اسمك</h2>
-        <label>اكتب اسمك كما تحب أن يظهر على العجلة</label>
-        <input type="text" id="nameInput" placeholder="مثال: أحمد خالد" />
-        <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
-          <button id="addBtn" class="btn">إضافة</button>
-          <button id="toWheelBtn" class="btn" disabled>ادخل وضع العجلة</button>
-          <button id="clearBtn" class="btn danger" disabled>حذف الأسماء</button>
+        <h2>استقطاب الأسماء</h2>
+        <div class="stack" style="align-items:flex-start">
+          <span id="capSessionCode" class="pill" style="display:none"></span>
+          <div class="qr">
+            <div class="qr-box" id="capQr"></div>
+            <div>
+              <div><strong>رابط الانضمام:</strong></div>
+              <div id="capJoinLink" style="word-break:break-all;margin:6px 0"></div>
+              <div class="muted">الطلبة يمسحوا QR أو يفتحوا الرابط ويكتبوا أسماءهم.</div>
+            </div>
+          </div>
+          <div class="stack" style="align-items:flex-start">
+            <button id="gotoWheelBtn" class="btn" disabled>انتقل إلى العجلة</button>
+            <button id="capClearBtn" class="btn danger" disabled>حذف الأسماء</button>
+          </div>
         </div>
-        <p class="muted" style="margin-top:8px">اضغط Enter للإضافة. يمنع التكرار تلقائيًا.</p>
       </div>
       <div class="col">
-        <h2>الأسماء</h2>
-        <div class="muted">المسجّلون: <strong id="count">0</strong></div>
-        <ul id="namesList"></ul>
+        <h2>الأسماء الواردة</h2>
+        <div class="muted">المسجّلون: <strong id="capCount">0</strong></div>
+        <ul id="capNames"></ul>
       </div>
     </div>
   </section>
@@ -57,30 +85,41 @@
       <div class="col center">
         <h2>العجلة</h2>
         <canvas id="wheel" width="520" height="520"></canvas>
-        <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
+        <div class="stack" style="margin-top:10px">
           <button id="spinBtn" class="btn" disabled>دَوِّر العجلة</button>
-          <button id="removeWinnerBtn" class="btn secondary" disabled>احذف الفائز</button>
-          <button id="backBtn" class="btn secondary">عودة للإدخال</button>
-          <button id="wipeBtn" class="btn danger">مسح الكل</button>
+          <div>
+            <button id="removeWinnerBtn" class="btn secondary" disabled>احذف الفائز</button>
+            <button id="clearBtn" class="btn danger" disabled>حذف الأسماء</button>
+          </div>
+          <div id="winnerBox" class="muted"></div>
         </div>
-        <div id="winnerBox" class="muted" style="margin-top:8px"></div>
       </div>
       <div class="col">
         <h2>قائمة الأسماء</h2>
-        <div class="muted">المسجّلون: <strong id="count2">0</strong></div>
-        <ul id="namesList2"></ul>
+        <div class="muted">المسجّلون: <strong id="count">0</strong></div>
+        <ul id="namesList"></ul>
       </div>
     </div>
   </section>
+
+  <!-- واجهة الطالب -->
+  <section id="joinPanel" class="card" style="display:none">
+    <h2>انضمام إلى الجلسة <span id="joinSessionCode" class="pill"></span></h2>
+    <label>اكتب اسمك كما تحب أن يظهر على العجلة</label>
+    <input type="text" id="studentName" placeholder="مثال: أحمد خالد" />
+    <div style="margin-top:10px"><button id="joinBtn" class="btn">إرسال الاسم</button></div>
+    <p class="muted" id="joinMsg"></p>
+  </section>
 </main>
 
-<!-- Firebase v12 (Modules) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-analytics.js";
-  import { getDatabase, ref, onValue, set, remove, update } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-database.js";
+  import { getDatabase, ref, onValue, set, remove } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-database.js";
 
-  // === Config: أضفت إعداداتك كما هي ===
+  // ــ Config: مشروعك tgdw-c9cb0 ــ
   const firebaseConfig = {
     apiKey: "AIzaSyA7yEAEAsSuNOGDY_GiWgviqJErMeAoWNk",
     authDomain: "tgdw-c9cb0.firebaseapp.com",
@@ -92,78 +131,30 @@
     measurementId: "G-8KCV53VW0F"
   };
 
-  // جلسة موحّدة (بدّلها لو حبيت)
-  const SESSION_CODE = "TGDW";
-
   const app = initializeApp(firebaseConfig);
-  try { getAnalytics(app); } catch(e) { console.warn("Analytics disabled (likely non-HTTPS):", e); }
+  try { getAnalytics(app); } catch (e) { console.warn("Analytics disabled:", e); }
   const db = getDatabase(app);
 
-  // DOM
   const $=s=>document.querySelector(s);
-  const inputPanel=$("#inputPanel"), wheelPanel=$("#wheelPanel");
-  const nameInput=$("#nameInput"), addBtn=$("#addBtn"), toWheelBtn=$("#toWheelBtn"), clearBtn=$("#clearBtn");
-  const namesList=$("#namesList"), countEl=$("#count");
-  const namesList2=$("#namesList2"), countEl2=$("#count2");
-  const spinBtn=$("#spinBtn"), removeWinnerBtn=$("#removeWinnerBtn"), backBtn=$("#backBtn"), wipeBtn=$("#wipeBtn"), winnerBox=$("#winnerBox");
-  const wheelCanvas=$("#wheel"); const ctx=wheelCanvas.getContext("2d");
+  const landingPanel=$("#landingPanel"),capturePanel=$("#capturePanel"),wheelPanel=$("#wheelPanel"),joinPanel=$("#joinPanel");
+  const capSessionCode=$("#capSessionCode"),capJoinLink=$("#capJoinLink"),capQr=$("#capQr"),capNames=$("#capNames"),capCount=$("#capCount");
+  const gotoWheelBtn=$("#gotoWheelBtn"),capClearBtn=$("#capClearBtn");
+  const namesList=$("#namesList"),count=$("#count"),wheel=$("#wheel"),ctx=wheel.getContext("2d");
+  const spinBtn=$("#spinBtn"),removeWinnerBtn=$("#removeWinnerBtn"),clearBtn=$("#clearBtn"),winnerBox=$("#winnerBox");
+  const joinSessionCode=$("#joinSessionCode"),studentName=$("#studentName"),joinBtn=$("#joinBtn"),joinMsg=$("#joinMsg");
 
-  // RTDB refs
-  const namesRef = ref(db, `sessions/${SESSION_CODE}/names`);
-  const metaRef  = ref(db, `sessions/${SESSION_CODE}/meta`);
+  let sessionCode=null,names=[],winner=null,spinning=false,angularVel=0,targetAngle=0,wheelRotation=0;
 
-  // حالة
-  let names = []; let winner=null;
-  let spinning=false, angularVel=0, targetAngle=0, wheelRotation=0;
+  const namesRef=c=>ref(db,`sessions/${c}/names`);
+  const metaRef=c=>ref(db,`sessions/${c}/meta`);
+  const keyFromName=n=>n.trim().toLowerCase().replace(/\s+/g,' ');
+  const makeCode=(l=6)=>{
+    const chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    return Array.from({length:l},()=> chars[Math.floor(Math.random()*chars.length)]).join('');
+  };
 
-  const keyFromName = n => n.trim().toLowerCase().replace(/\s+/g,' ');
-
-  // UI
-  function renderLists(){
-    const html = names.map(n=>`<li>${n}</li>`).join("");
-    namesList.innerHTML = html; namesList2.innerHTML = html;
-    countEl.textContent = names.length; countEl2.textContent = names.length;
-    const disabled = names.length===0;
-    toWheelBtn.disabled = disabled; clearBtn.disabled = disabled; spinBtn.disabled = disabled;
-  }
-
-  // Live subscribe
-  onValue(namesRef, snap=>{
-    const obj = snap.val() || {};
-    names = Object.keys(obj).sort((a,b)=>a.localeCompare(b,'ar'));
-    renderLists(); if(!spinning) drawWheel();
-  });
-
-  // Ensure meta
-  update(metaRef, { createdAt: Date.now() }).catch(()=>{});
-
-  // Actions
-  async function addName(){
-    const v = nameInput.value.trim();
-    if(!v) return;
-    const k = keyFromName(v);
-    try{
-      await set(ref(db, `sessions/${SESSION_CODE}/names/${k}`), true);
-      nameInput.value = ""; nameInput.focus();
-    }catch(err){ alert("تعذّر الإضافة: "+(err?.message||err)); }
-  }
-  async function wipeAll(){
-    try{
-      await set(namesRef, null);
-      winner=null; winnerBox.textContent=""; removeWinnerBtn.disabled=true;
-    }catch(err){ alert("تعذّر المسح: "+(err?.message||err)); }
-  }
-
-  addBtn.onclick = addName;
-  nameInput.addEventListener("keydown", e=>{ if(e.key==="Enter") addName(); });
-  clearBtn.onclick = wipeAll; wipeBtn.onclick = wipeAll;
-
-  toWheelBtn.onclick = ()=>{ inputPanel.style.display="none"; wheelPanel.style.display="block"; drawWheel(); };
-  backBtn.onclick    = ()=>{ wheelPanel.style.display="none"; inputPanel.style.display="block"; nameInput.focus(); };
-
-  // Wheel
   function drawWheel(){
-    const W=wheelCanvas.width,H=wheelCanvas.height,cx=W/2,cy=H/2,r=Math.min(W,H)/2-12;
+    const W=wheel.width,H=wheel.height,cx=W/2,cy=H/2,r=Math.min(W,H)/2-12;
     ctx.clearRect(0,0,W,H);
     ctx.beginPath();ctx.arc(cx,cy,r+10,0,2*Math.PI);ctx.strokeStyle="rgba(139,94,52,.25)";ctx.lineWidth=8;ctx.stroke();
     const n=Math.max(names.length,1),angle=2*Math.PI/n;
@@ -180,6 +171,7 @@
     ctx.beginPath();ctx.arc(cx,cy,34,0,2*Math.PI);ctx.fillStyle="#fff";ctx.fill();ctx.lineWidth=3;ctx.strokeStyle="rgba(139,94,52,.35)";ctx.stroke();
     if(winner){ctx.fillStyle="var(--brown)";ctx.font="bold 16px system-ui";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText("🎉",cx,cy);}
   }
+  drawWheel();
 
   function spin(){
     if(names.length===0||spinning)return;
@@ -198,19 +190,58 @@
     }
     drawWheel();requestAnimationFrame(animate);
   }
-  spinBtn.onclick = spin;
 
-  removeWinnerBtn.onclick = async ()=>{
-    if(!winner) return;
-    const k = keyFromName(winner);
+  function bindNamesUI(listEl,countEl,enableBtns){
+    return snap=>{
+      const obj=snap.val()||{};names=Object.keys(obj).sort((a,b)=>a.localeCompare(b,'ar'));
+      listEl.innerHTML=names.map(n=>`<li>${n}</li>`).join("");
+      countEl.textContent=names.length;
+      if(enableBtns)enableBtns(names.length>0);
+      if(!spinning)drawWheel();
+    };
+  }
+
+  // إنشاء جلسة + عرض QR
+  $("#startCaptureBtn").onclick=async()=>{
     try{
-      await remove(ref(db, `sessions/${SESSION_CODE}/names/${k}`));
-      winner=null; winnerBox.textContent=""; removeWinnerBtn.disabled=true;
-    }catch(err){ alert("تعذّر الحذف: "+(err?.message||err)); }
+      sessionCode=makeCode();
+      await set(metaRef(sessionCode),{createdAt:Date.now()});
+      const url=new URL(location.href);url.searchParams.set('join',sessionCode);
+      capSessionCode.style.display='inline-block';capSessionCode.textContent=`الكود: ${sessionCode}`;
+      capJoinLink.textContent=url.toString();capQr.innerHTML="";
+      new QRCode(capQr,{text:url.toString(),width:180,height:180});
+      onValue(namesRef(sessionCode),bindNamesUI(capNames,capCount,(has)=>{gotoWheelBtn.disabled=!has;capClearBtn.disabled=!has;}));
+      landingPanel.style.display='none';capturePanel.style.display='block';
+    }catch(err){alert("تعذّر إنشاء الجلسة: "+(err?.message||err));}
   };
 
-  // أول رسم
-  drawWheel();
+  // إلى العجلة
+  gotoWheelBtn.onclick=()=>{
+    onValue(namesRef(sessionCode),bindNamesUI(namesList,count,(has)=>{spinBtn.disabled=!has;clearBtn.disabled=!has;}));
+    capturePanel.style.display='none';wheelPanel.style.display='block';
+  };
+
+  // إدارة
+  capClearBtn.onclick=async()=>{if(sessionCode)await set(namesRef(sessionCode),null);};
+  clearBtn.onclick=async()=>{if(sessionCode)await set(namesRef(sessionCode),null);winner=null;winnerBox.textContent="";removeWinnerBtn.disabled=true;};
+  removeWinnerBtn.onclick=async()=>{if(!winner||!sessionCode)return;await remove(ref(db,`sessions/${sessionCode}/names/${keyFromName(winner)}`));winner=null;winnerBox.textContent="";removeWinnerBtn.disabled=true;};
+  spinBtn.onclick=spin;
+
+  // واجهة الطالب
+  function isJoinPage(){return new URLSearchParams(location.search).has('join');}
+  function joinCode(){return new URLSearchParams(location.search).get('join');}
+  if(isJoinPage()){
+    landingPanel.style.display='none';capturePanel.style.display='none';wheelPanel.style.display='none';joinPanel.style.display='block';
+    joinSessionCode.textContent=joinCode();
+  }
+  joinBtn.onclick=async()=>{
+    const code=joinCode(),name=studentName.value.trim();
+    if(!name){joinMsg.textContent="رجاءً اكتب اسمك.";return;}
+    await set(ref(db,`sessions/${code}/names/${keyFromName(name)}`),true);
+    joinMsg.textContent="تم تسجيل اسمك ✔️. يمكنك إغلاق الصفحة.";studentName.value="";
+  };
+
+  window.addEventListener('resize',drawWheel);
 </script>
 </body>
 </html>
