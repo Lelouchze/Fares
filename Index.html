@@ -3,119 +3,122 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>عجلة اختيار اسم - ورشة TGD</title>
+<title>ورشة TGD • استقطاب بالأكواد + عجلة</title>
 <style>
   :root{
-    --blue:#1e3a8a;    /* أزرق عميق */
-    --blue-100:#e8eefc;/* تينت أزرق فاتح */
-    --brown:#8b5e34;   /* بني حديث */
-    --ink:#0f172a;     /* نص داكن */
-    --muted:#64748b;   /* نص خافت */
-    --bg:#f7f8fb;      /* خلفية بيضاء مائلة */
-    --card:#ffffff;    /* بطاقة */
+    --blue:#1e3a8a; --blue-100:#e8eefc; --brown:#8b5e34;
+    --ink:#0f172a; --muted:#64748b; --bg:#f7f8fb; --card:#fff;
   }
-  *{box-sizing:border-box}
-  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0;background:var(--bg);color:var(--ink)}
-  header{
-    background:linear-gradient(135deg,var(--blue) 0%, #2b4ab6 60%, var(--blue-100) 120%);
-    color:#fff;padding:20px
-  }
-  .brand{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-  .brand h1{margin:0;font-size:20px;font-weight:800;letter-spacing:.3px}
+  *{box-sizing:border-box} body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0;background:var(--bg);color:var(--ink)}
+  header{background:linear-gradient(135deg,var(--blue) 0%, #2b4ab6 60%, var(--blue-100) 120%);color:#fff;padding:20px}
+  .brand{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .brand h1{margin:0;font-size:20px;font-weight:800}
+  .accent{color:var(--brown)}
   .tag{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.25);padding:4px 10px;border-radius:999px;font-size:12px}
-  .welcome{
-    margin-top:8px;background:#fff1;border-left:4px solid #fff8;padding:8px 12px;border-radius:8px;backdrop-filter: blur(3px)
-  }
+  .welcome{margin-top:8px;background:#fff1;border-left:4px solid #fff8;padding:8px 12px;border-radius:8px;backdrop-filter: blur(3px)}
   main{max-width:1100px;margin:22px auto;padding:0 16px}
   .card{background:var(--card);border-radius:14px;box-shadow:0 10px 30px rgba(16,24,40,.06);padding:16px;margin-bottom:16px}
-  .row{display:flex;gap:16px;flex-wrap:wrap}
-  .col{flex:1;min-width:290px}
-  h2{margin:6px 0 12px;font-size:18px}
-  label{display:block;margin:8px 0 4px}
-  input[type=text]{width:100%;padding:12px;border:1px solid #e2e8f0;border-radius:10px}
-  button{
-    cursor:pointer;border:0;border-radius:12px;padding:11px 14px;font-weight:700;
-    background:var(--blue);color:#fff;transition:.15s transform ease,.2s opacity ease
-  }
-  button:hover{transform:translateY(-1px)}
-  button.secondary{background:#eaeaea;color:#222}
-  button.danger{background:#ef4444}
+  .center{text-align:center}
+  .btn{cursor:pointer;border:0;border-radius:12px;padding:12px 16px;font-weight:800;background:var(--blue);color:#fff}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .btn.secondary{background:#eaeaea;color:#222}
+  .btn.danger{background:#ef4444}
   .muted{color:var(--muted);font-size:13px}
   .pill{display:inline-block;background:var(--blue-100);color:var(--blue);border:1px solid #c7d2fe;border-radius:999px;padding:4px 10px;font-size:12px}
-  .badge{font-size:12px;background:var(--brown);color:#fff;border-radius:6px;padding:3px 8px}
-  canvas{width:100%;max-width:520px;aspect-ratio:1/1;background:#fff;border-radius:50%;display:block;margin:auto;border:8px solid #fff;box-shadow:0 6px 20px rgba(0,0,0,.08)}
-  ul{list-style:none;padding:0;margin:8px 0}
-  li{padding:8px 10px;border-bottom:1px dashed #eee}
+  .stack{display:flex;flex-direction:column;gap:12px;align-items:center}
+  .row{display:flex;gap:16px;flex-wrap:wrap}
+  .col{flex:1;min-width:280px}
   .qr{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
-  .qr-box{width:170px;height:170px;border:2px dashed #cbd5e1;border-radius:14px;display:flex;align-items:center;justify-content:center;background:#fff}
-  .accent{color:var(--brown)}
-  .toolbar{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
-  .stat{display:flex;align-items:center;gap:8px}
-  .stat-dot{width:8px;height:8px;border-radius:50%;background:var(--blue)}
+  .qr-box{width:180px;height:180px;border:2px dashed #cbd5e1;border-radius:14px;display:flex;align-items:center;justify-content:center;background:#fff}
+  ul{list-style:none;margin:8px 0;padding:0} li{padding:8px 10px;border-bottom:1px dashed #eee}
+  canvas{width:100%;max-width:520px;aspect-ratio:1/1;background:#fff;border-radius:50%;display:block;margin:auto;border:8px solid #fff;box-shadow:0 6px 20px rgba(0,0,0,.08)}
 </style>
 </head>
 <body>
 <header>
   <div class="brand">
     <h1>أهلاً بكم <span class="accent">بورشة TGD</span></h1>
-    <span class="tag">عجلة اختيار اسم • QR</span>
+    <span class="tag">استقطاب بالأكواد (QR) + عجلة اختيار اسم</span>
   </div>
-  <div class="welcome">اكتب اسمك عبر الرابط/الـQR لتدخل السحبة مباشرة. الألوان: أزرق × بني × أبيض بطابع حديث.</div>
+  <div class="welcome">الخطوة الأولى دائمًا: استقطاب الأسماء عبر QR. بعد ما يتسجّلوا الطلاب، انتقل للعجلة.</div>
 </header>
 
 <main>
-  <!-- لوحة المدرّس -->
-  <div class="card" id="hostPanel">
+  <!-- 0) صفحة الهبوط: استقطاب الأسماء أولاً -->
+  <section id="landingPanel" class="card center">
+    <h2>ابدأ الاستقطاب</h2>
+    <div class="stack">
+      <button id="startCaptureBtn" class="btn">ابدأ استقطاب الأسماء (QR)</button>
+      <p class="muted">سيتم إنشاء جلسة جديدة، وإظهار QR ورابط للطلاب لإدخال أسمائهم.</p>
+    </div>
+  </section>
+
+  <!-- 1) لوحة الاستقطاب عبر QR -->
+  <section id="capturePanel" class="card" style="display:none">
     <div class="row">
       <div class="col">
-        <h2>1) أنشئ جلسة</h2>
-        <div class="toolbar" style="justify-content:flex-start">
-          <button id="createSessionBtn">إنشاء جلسة جديدة</button>
-          <span class="pill" id="sessionCodePill" style="display:none"></span>
-        </div>
-        <p class="muted" id="hostHint" style="display:none;margin-top:6px">اعرض QR أو أرسل الرابط للطلاب.</p>
-        <div class="qr" id="joinArea" style="display:none;margin-top:10px">
-          <div class="qr-box" id="qrcode"></div>
-          <div>
-            <div><strong>رابط الانضمام:</strong></div>
-            <div id="joinLink" style="word-break:break-all;margin:6px 0"></div>
-            <div class="muted">امسح QR أو افتح الرابط، اكتب اسمك، وخلاص ✨</div>
+        <h2>استقطاب الأسماء</h2>
+        <div class="stack" style="align-items:flex-start">
+          <span id="capSessionCode" class="pill" style="display:none"></span>
+          <div class="qr">
+            <div class="qr-box" id="capQr"></div>
+            <div>
+              <div><strong>رابط الانضمام:</strong></div>
+              <div id="capJoinLink" style="word-break:break-all;margin:6px 0"></div>
+              <div class="muted">الطلاب يمسحوا QR أو يفتحوا الرابط ويكتبوا أسماءهم.</div>
+            </div>
+          </div>
+          <div class="stack" style="align-items:flex-start">
+            <button id="gotoWheelBtn" class="btn" disabled>انتقل إلى العجلة</button>
+            <button id="capClearBtn" class="btn danger" disabled>حذف الأسماء</button>
+            <span class="muted">يتفعّل زر “انتقل إلى العجلة” عند وجود أسماء.</span>
           </div>
         </div>
       </div>
-
-      <div class="col" style="text-align:center">
-        <h2>2) العجلة</h2>
-        <canvas id="wheel" width="520" height="520"></canvas>
-        <div class="toolbar" style="margin-top:10px">
-          <button id="spinBtn" disabled>دَوِّر العجلة</button>
-          <button id="removeWinnerBtn" class="secondary" disabled>احذف الفائز</button>
-          <button id="clearBtn" class="danger" disabled>حذف الأسماء</button>
-        </div>
-        <div id="winnerBox" class="muted" style="margin-top:8px"></div>
-      </div>
-
       <div class="col">
-        <h2>3) الأسماء</h2>
-        <div class="stat"><span class="stat-dot"></span> <span class="muted">المسجّلون:</span> <strong id="count">0</strong></div>
+        <h2>الأسماء الواردة</h2>
+        <div class="muted">المسجّلون: <strong id="capCount">0</strong></div>
+        <ul id="capNames"></ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2) لوحة العجلة -->
+  <section id="wheelPanel" class="card" style="display:none">
+    <div class="row">
+      <div class="col center">
+        <h2>العجلة</h2>
+        <canvas id="wheel" width="520" height="520"></canvas>
+        <div class="stack" style="margin-top:10px">
+          <button id="spinBtn" class="btn" disabled>دَوِّر العجلة</button>
+          <div>
+            <button id="removeWinnerBtn" class="btn secondary" disabled>احذف الفائز</button>
+            <button id="clearBtn" class="btn danger" disabled>حذف الأسماء</button>
+          </div>
+          <div id="winnerBox" class="muted"></div>
+        </div>
+      </div>
+      <div class="col">
+        <h2>قائمة الأسماء</h2>
+        <div class="muted">المسجّلون: <strong id="count">0</strong></div>
         <ul id="namesList"></ul>
       </div>
     </div>
-  </div>
+  </section>
 
-  <!-- لوحة الطالب -->
-  <div class="card" id="joinPanel" style="display:none">
+  <!-- واجهة الطالب (عند ?join=CODE) -->
+  <section id="joinPanel" class="card" style="display:none">
     <h2>انضمام إلى الجلسة <span id="joinSessionCode" class="pill"></span></h2>
     <label>اكتب اسمك كما تحب أن يظهر على العجلة</label>
     <input type="text" id="studentName" placeholder="مثال: أحمد خالد" />
-    <div class="toolbar" style="justify-content:flex-start;margin-top:8px">
-      <button id="joinBtn">إرسال الاسم</button>
+    <div style="margin-top:10px">
+      <button id="joinBtn" class="btn">إرسال الاسم</button>
     </div>
-    <p class="muted" id="joinMsg" style="margin-top:6px"></p>
-  </div>
+    <p class="muted" id="joinMsg"></p>
+  </section>
 </main>
 
-<!-- QRCode (non-module) -->
+<!-- QRCode -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
 <!-- Firebase v12 Modules -->
@@ -124,7 +127,7 @@
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-analytics.js";
   import { getDatabase, ref, onValue, set, remove } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-database.js";
 
-  // إعداداتك (أضفت databaseURL لقاعدة RTDB)
+  // إعداداتك
   const firebaseConfig = {
     apiKey: "AIzaSyD7sLHWDkGIZUAB4qNPMaBCq-bR1QMkr7U",
     authDomain: "fares-23426.firebaseapp.com",
@@ -140,36 +143,62 @@
   getAnalytics(app);
   const db = getDatabase(app);
 
-  /* ====== عناصر DOM ====== */
+  /* ====== أدوات عامة ====== */
   const $ = s => document.querySelector(s);
+  const landingPanel  = $("#landingPanel");
+  const capturePanel  = $("#capturePanel");
+  const wheelPanel    = $("#wheelPanel");
+  const joinPanel     = $("#joinPanel");
+
+  // عناصر الاستقطاب
+  const capSessionCodeEl = $("#capSessionCode");
+  const capJoinLinkEl    = $("#capJoinLink");
+  const capQrEl          = $("#capQr");
+  const capNamesEl       = $("#capNames");
+  const capCountEl       = $("#capCount");
+  const gotoWheelBtn     = $("#gotoWheelBtn");
+  const capClearBtn      = $("#capClearBtn");
+
+  // عناصر العجلة
   const namesListEl = $("#namesList");
-  const countEl = $("#count");
+  const countEl     = $("#count");
   const wheelCanvas = $("#wheel");
-  const ctx = wheelCanvas.getContext("2d");
+  const ctx         = wheelCanvas.getContext("2d");
+  const spinBtn     = $("#spinBtn");
+  const removeWinnerBtn = $("#removeWinnerBtn");
+  const clearBtn    = $("#clearBtn");
+  const winnerBox   = $("#winnerBox");
+
+  // عناصر صفحة الطالب
+  const joinSessionCode = $("#joinSessionCode");
+  const studentNameInput= $("#studentName");
+  const joinBtn         = $("#joinBtn");
+  const joinMsg         = $("#joinMsg");
+
+  // حالة
   let sessionCode = null;
   let names = [];
   let winner = null;
+  let spinning=false, angularVel=0, targetAngle=0, wheelRotation=0;
 
-  /* أكواد مساعدة */
+  function keyFromName(name){ return name.trim().toLowerCase().replace(/\s+/g,' '); }
+  const namesRef = code => ref(db, `sessions/${code}/names`);
+  const metaRef  = code => ref(db, `sessions/${code}/meta`);
+
   function makeCode(len=6){
     const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
     let s=""; for(let i=0;i<len;i++) s += chars[Math.floor(Math.random()*chars.length)];
     return s;
   }
-  function keyFromName(name){
-    return name.trim().toLowerCase().replace(/\s+/g,' ');
-  }
-  const namesRef = code => ref(db, `sessions/${code}/names`);
-  const metaRef  = code => ref(db, `sessions/${code}/meta`);
 
-  /* رسم العجلة */
-  let wheelRotation = 0;
+  /* ====== رسم العجلة ====== */
   function drawWheel(){
+    if(!wheelCanvas) return;
     const W = wheelCanvas.width, H = wheelCanvas.height;
     const cx = W/2, cy = H/2, r = Math.min(W,H)/2 - 12;
     ctx.clearRect(0,0,W,H);
 
-    // إطار خارجي بنّي خفيف
+    // إطار خارجي
     ctx.beginPath(); ctx.arc(cx,cy,r+10,0,2*Math.PI);
     ctx.strokeStyle="rgba(139,94,52,.25)"; ctx.lineWidth=8; ctx.stroke();
 
@@ -183,32 +212,24 @@
       ctx.moveTo(cx,cy);
       ctx.arc(cx,cy,r,start,end);
       ctx.closePath();
-      // شرائح متدرجة (أزرق/بني/أبيض)
+      // شرائح أزرق/بني/أبيض
       const hue = (i*360/n)%360;
-      // نضبط التلوين نحو الأزرق، مع لمسة بنية عبر المزج
-      const mix = i%3===0 ? 'rgba(139,94,52,.15)' : 'rgba(30,58,138,.15)';
-      ctx.fillStyle = `hsl(${hue}, 70%, 78%)`;
-      ctx.fill();
-      // طبقة شفافة خفيفة لإحساس الثيم
-      ctx.fillStyle = mix;
-      ctx.fill();
+      const tint = i%3===0 ? 'rgba(139,94,52,.18)' : 'rgba(30,58,138,.18)';
+      ctx.fillStyle = `hsl(${hue}, 70%, 78%)`; ctx.fill();
+      ctx.fillStyle = tint; ctx.fill();
 
       // نص
       const mid = (start+end)/2;
       const tx = cx + (r*0.6)*Math.cos(mid);
       const ty = cy + (r*0.6)*Math.sin(mid);
-      ctx.save();
-      ctx.translate(tx,ty);
-      ctx.rotate(mid);
-      ctx.fillStyle="#0f172a";
-      ctx.font="15px system-ui, -apple-system, Segoe UI, Arial";
+      ctx.save(); ctx.translate(tx,ty); ctx.rotate(mid);
+      ctx.fillStyle="#0f172a"; ctx.font="15px system-ui,-apple-system,Segoe UI,Arial";
       const label = names[i] || "—";
-      ctx.textAlign="center"; ctx.textBaseline="middle";
-      ctx.fillText(label,0,0);
+      ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillText(label,0,0);
       ctx.restore();
     }
 
-    // المؤشر (مثلث أزرق)
+    // المؤشر
     ctx.beginPath();
     ctx.moveTo(cx + r + 12, cy);
     ctx.lineTo(cx + r + 42, cy - 12);
@@ -216,7 +237,7 @@
     ctx.closePath();
     ctx.fillStyle="var(--blue)"; ctx.fill();
 
-    // وسط أبيض بحواف بنية
+    // مركز
     ctx.beginPath(); ctx.arc(cx,cy,34,0,2*Math.PI); ctx.fillStyle="#fff"; ctx.fill();
     ctx.lineWidth=3; ctx.strokeStyle="rgba(139,94,52,.35)"; ctx.stroke();
 
@@ -229,19 +250,17 @@
   }
   drawWheel();
 
-  /* أنيميشن الدوران */
-  let spinning=false, angularVel=0, targetAngle=0;
+  /* ====== دوران ====== */
   function spin(){
     if(names.length===0 || spinning) return;
     const n = names.length;
-    const idx = Math.floor(Math.random() * n);
+    const idx = Math.floor(Math.random()*n);
     const anglePer = 2*Math.PI / n;
     const segmentCenter = idx * anglePer + anglePer/2;
     const laps = 4 + Math.floor(Math.random()*2);
     targetAngle = (2*Math.PI*laps) + (2*Math.PI - segmentCenter) - (wheelRotation % (2*Math.PI));
     angularVel = (Math.random()*0.25)+0.35;
-    spinning = true; winner=null;
-    $("#winnerBox").textContent = "جاري الدوران...";
+    spinning = true; winner=null; winnerBox.textContent = "جاري الدوران...";
     animate();
   }
   function animate(){
@@ -251,101 +270,112 @@
     angularVel = Math.max(0.01, angularVel - decel);
     if(angularVel <= 0.012){
       spinning = false;
-      // اضبط النهاية تمامًا على الهدف
       wheelRotation += (targetAngle - (wheelRotation % (2*Math.PI)));
-      const n = names.length;
-      const anglePer = 2*Math.PI / n;
+      const n = names.length; const anglePer = 2*Math.PI / n;
       const at = (2*Math.PI - (wheelRotation % (2*Math.PI))) % (2*Math.PI);
       const idx = Math.floor(((at + anglePer/2) % (2*Math.PI)) / anglePer);
       winner = names[idx] || null;
       drawWheel();
-      $("#winnerBox").innerHTML = winner ? `الفائز: <strong>${winner}</strong>` : "";
-      $("#removeWinnerBtn").disabled = !winner;
+      winnerBox.innerHTML = winner ? `الفائز: <strong>${winner}</strong>` : "";
+      removeWinnerBtn.disabled = !winner;
       return;
     }
     drawWheel();
     requestAnimationFrame(animate);
   }
 
-  /* متابعة الأسماء */
-  let unsub = null;
-  function watchNames(code){
-    if(unsub) { unsub(); unsub=null; }
-    const r = namesRef(code);
-    const handler = snap=>{
+  /* ====== متابعة الأسماء (مشتركة بين الشاشتين) ====== */
+  function bindNamesUI(listEl, countEl, enableButtons){
+    return snap=>{
       const obj = snap.val() || {};
       names = Object.keys(obj).sort((a,b)=>a.localeCompare(b,'ar'));
-      namesListEl.innerHTML = names.map(n=>`<li>${n}</li>`).join("");
+      listEl.innerHTML = names.map(n=>`<li>${n}</li>`).join("");
       countEl.textContent = String(names.length);
-      $("#spinBtn").disabled = names.length===0;
-      $("#clearBtn").disabled = names.length===0;
+      if(enableButtons) enableButtons(names.length>0);
       if(!spinning) drawWheel();
     };
-    onValue(r, handler);
-    unsub = ()=>{ /* لا إلغاء سهل في v12 للـ onValue إلا بإزالة المستمع عبر ref جديد؛ نكتفي بهذا للسياق البسيط */ };
   }
 
-  /* إنشاء جلسة */
-  $("#createSessionBtn").onclick = async ()=>{
+  /* ====== تدفق الواجهات ====== */
+  // 0) هبوط
+  $("#startCaptureBtn").onclick = async ()=>{
+    // أنشئ جلسة
     sessionCode = makeCode();
     await set(metaRef(sessionCode), { createdAt: Date.now() });
 
-    watchNames(sessionCode);
-
-    $("#sessionCodePill").style.display='inline-block';
-    $("#sessionCodePill").textContent = `الكود: ${sessionCode}`;
-    $("#hostHint").style.display='block';
-    $("#joinArea").style.display='flex';
-
+    // جهّز QR+رابط
     const url = new URL(window.location.href);
     url.searchParams.set('join', sessionCode);
-    $("#joinLink").textContent = url.toString();
+    capSessionCodeEl.style.display='inline-block';
+    capSessionCodeEl.textContent = `الكود: ${sessionCode}`;
+    capJoinLinkEl.textContent = url.toString();
+    capQrEl.innerHTML = "";
+    new QRCode(capQrEl, { text: url.toString(), width: 180, height: 180 });
 
-    const qrDiv = $("#qrcode");
-    qrDiv.innerHTML = "";
-    new QRCode(qrDiv, { text: url.toString(), width: 170, height: 170 });
+    // راقب الأسماء لواجهة الاستقطاب
+    onValue(namesRef(sessionCode), bindNamesUI(capNamesEl, capCountEl, (has)=> {
+      gotoWheelBtn.disabled = !has;
+      capClearBtn.disabled  = !has;
+    }));
 
-    $("#spinBtn").disabled = true;
-    $("#clearBtn").disabled = true;
-    $("#removeWinnerBtn").disabled = true;
+    // أظهر شاشة الاستقطاب
+    landingPanel.style.display='none';
+    capturePanel.style.display='block';
   };
 
-  /* أزرار التحكم */
-  $("#spinBtn").onclick = spin;
-  $("#removeWinnerBtn").onclick = async ()=>{
-    if(!winner || !sessionCode) return;
-    await remove(ref(db, `sessions/${sessionCode}/names/${keyFromName(winner)}`));
-    winner = null; $("#winnerBox").textContent = "";
-    $("#removeWinnerBtn").disabled = true;
+  // 1) من الاستقطاب إلى العجلة
+  gotoWheelBtn.onclick = ()=>{
+    // اربط قائمة العجلة بنفس الجلسة
+    onValue(namesRef(sessionCode), bindNamesUI(namesListEl, countEl, (has)=>{
+      spinBtn.disabled = !has;
+      clearBtn.disabled = !has;
+    }));
+    capturePanel.style.display='none';
+    wheelPanel.style.display='block';
   };
-  $("#clearBtn").onclick = async ()=>{
+
+  // تنظيفات الأسماء
+  capClearBtn.onclick = async ()=>{
     if(!sessionCode) return;
     await set(namesRef(sessionCode), null);
-    winner = null; $("#winnerBox").textContent = "";
-    $("#removeWinnerBtn").disabled = true;
   };
+  clearBtn.onclick = async ()=>{
+    if(!sessionCode) return;
+    await set(namesRef(sessionCode), null);
+    winner=null; winnerBox.textContent=""; removeWinnerBtn.disabled=true;
+  };
+  removeWinnerBtn.onclick = async ()=>{
+    if(!winner || !sessionCode) return;
+    await remove(ref(db, `sessions/${sessionCode}/names/${keyFromName(winner)}`));
+    winner=null; winnerBox.textContent=""; removeWinnerBtn.disabled=true;
+  };
+  spinBtn.onclick = spin;
 
-  /* واجهة الطالب */
+  /* ====== واجهة الطالب ====== */
   function isJoinPage(){ return new URLSearchParams(location.search).has('join'); }
   function joinCode(){ return new URLSearchParams(location.search).get('join'); }
 
   if(isJoinPage()){
-    $("#hostPanel").style.display='none';
-    $("#joinPanel").style.display='block';
-    $("#joinSessionCode").textContent = joinCode();
+    // الطالب يرى فوراً شاشة الانضمام
+    landingPanel.style.display='none';
+    capturePanel.style.display='none';
+    wheelPanel.style.display='none';
+    joinPanel.style.display='block';
+    joinSessionCode.textContent = joinCode();
   }
 
-  $("#joinBtn").onclick = async ()=>{
+  joinBtn.onclick = async ()=>{
     const code = joinCode();
-    const name = $("#studentName").value.trim();
-    if(!name){ $("#joinMsg").textContent = "رجاءً اكتب اسمك."; return; }
+    const name = studentNameInput.value.trim();
+    if(!name){ joinMsg.textContent = "رجاءً اكتب اسمك."; return; }
     const k = keyFromName(name);
     await set(ref(db, `sessions/${code}/names/${k}`), true);
-    $("#joinMsg").textContent = "تم تسجيل اسمك ✔️. يمكنك إغلاق الصفحة.";
-    $("#studentName").value = "";
+    joinMsg.textContent = "تم تسجيل اسمك ✔️. يمكنك إغلاق الصفحة.";
+    studentNameInput.value = "";
   };
 
   window.addEventListener('resize', ()=>drawWheel());
 </script>
+
 </body>
 </html>
