@@ -29,7 +29,7 @@
 </header>
 
 <main>
-  <!-- إدخال الأسماء (يظهر أولاً) -->
+  <!-- إدخال الأسماء (أول شاشة) -->
   <section id="inputPanel" class="card">
     <div class="row">
       <div class="col">
@@ -41,7 +41,7 @@
           <button id="toWheelBtn" class="btn" disabled>ادخل وضع العجلة</button>
           <button id="clearBtn" class="btn danger" disabled>حذف الأسماء</button>
         </div>
-        <p class="muted" style="margin-top:8px">Enter يضيف الاسم. يمنع التكرار تلقائيًا.</p>
+        <p class="muted" style="margin-top:8px">اضغط Enter للإضافة. يمنع التكرار تلقائيًا.</p>
       </div>
       <div class="col">
         <h2>الأسماء</h2>
@@ -80,26 +80,26 @@
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-analytics.js";
   import { getDatabase, ref, onValue, set, remove, update } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-database.js";
 
-  // ---------- إعداداتك (أضفت databaseURL) ----------
+  // === Config: أضفت إعداداتك كما هي ===
   const firebaseConfig = {
-    apiKey: "AIzaSyD7sLHWDkGIZUAB4qNPMaBCq-bR1QMkr7U",
-    authDomain: "fares-23426.firebaseapp.com",
-    projectId: "fares-23426",
-    storageBucket: "fares-23426.firebasestorage.app",
-    messagingSenderId: "369109244141",
-    appId: "1:369109244141:web:5d6de927469bbcc37494e4",
-    measurementId: "G-27E3L0R453",
-    databaseURL: "https://fares-23426-default-rtdb.firebaseio.com"
+    apiKey: "AIzaSyA7yEAEAsSuNOGDY_GiWgviqJErMeAoWNk",
+    authDomain: "tgdw-c9cb0.firebaseapp.com",
+    databaseURL: "https://tgdw-c9cb0-default-rtdb.firebaseio.com",
+    projectId: "tgdw-c9cb0",
+    storageBucket: "tgdw-c9cb0.firebasestorage.app",
+    messagingSenderId: "864522007971",
+    appId: "1:864522007971:web:c371ff6b264aa3c2309616",
+    measurementId: "G-8KCV53VW0F"
   };
-  // كود الجلسة (بدّله إذا أردت جلسات مختلفة)
-  const SESSION_CODE = "TGD1";
-  // --------------------------------------------------
+
+  // جلسة موحّدة (بدّلها لو حبيت)
+  const SESSION_CODE = "TGDW";
 
   const app = initializeApp(firebaseConfig);
-  try { getAnalytics(app); } catch(e) { console.warn("Analytics disabled:", e); }
+  try { getAnalytics(app); } catch(e) { console.warn("Analytics disabled (likely non-HTTPS):", e); }
   const db = getDatabase(app);
 
-  // عناصر DOM
+  // DOM
   const $=s=>document.querySelector(s);
   const inputPanel=$("#inputPanel"), wheelPanel=$("#wheelPanel");
   const nameInput=$("#nameInput"), addBtn=$("#addBtn"), toWheelBtn=$("#toWheelBtn"), clearBtn=$("#clearBtn");
@@ -112,43 +112,41 @@
   const namesRef = ref(db, `sessions/${SESSION_CODE}/names`);
   const metaRef  = ref(db, `sessions/${SESSION_CODE}/meta`);
 
-  // حالة واجهة
+  // حالة
   let names = []; let winner=null;
   let spinning=false, angularVel=0, targetAngle=0, wheelRotation=0;
 
-  // Helpers
   const keyFromName = n => n.trim().toLowerCase().replace(/\s+/g,' ');
-  const renderLists = ()=>{
+
+  // UI
+  function renderLists(){
     const html = names.map(n=>`<li>${n}</li>`).join("");
     namesList.innerHTML = html; namesList2.innerHTML = html;
     countEl.textContent = names.length; countEl2.textContent = names.length;
     const disabled = names.length===0;
     toWheelBtn.disabled = disabled; clearBtn.disabled = disabled; spinBtn.disabled = disabled;
-  };
+  }
 
-  // مراقبة الأسماء (حيّ)
+  // Live subscribe
   onValue(namesRef, snap=>{
     const obj = snap.val() || {};
     names = Object.keys(obj).sort((a,b)=>a.localeCompare(b,'ar'));
     renderLists(); if(!spinning) drawWheel();
   });
 
-  // إنشاء الميتاداتا (إن لم توجد)
+  // Ensure meta
   update(metaRef, { createdAt: Date.now() }).catch(()=>{});
 
-  // إضافة اسم
+  // Actions
   async function addName(){
     const v = nameInput.value.trim();
     if(!v) return;
     const k = keyFromName(v);
     try{
       await set(ref(db, `sessions/${SESSION_CODE}/names/${k}`), true);
-      nameInput.value = "";
-      nameInput.focus();
+      nameInput.value = ""; nameInput.focus();
     }catch(err){ alert("تعذّر الإضافة: "+(err?.message||err)); }
   }
-
-  // مسح جميع الأسماء
   async function wipeAll(){
     try{
       await set(namesRef, null);
@@ -156,14 +154,14 @@
     }catch(err){ alert("تعذّر المسح: "+(err?.message||err)); }
   }
 
-  // تنقل الواجهات
+  addBtn.onclick = addName;
+  nameInput.addEventListener("keydown", e=>{ if(e.key==="Enter") addName(); });
+  clearBtn.onclick = wipeAll; wipeBtn.onclick = wipeAll;
+
   toWheelBtn.onclick = ()=>{ inputPanel.style.display="none"; wheelPanel.style.display="block"; drawWheel(); };
   backBtn.onclick    = ()=>{ wheelPanel.style.display="none"; inputPanel.style.display="block"; nameInput.focus(); };
-  clearBtn.onclick   = wipeAll; wipeBtn.onclick = wipeAll;
-  addBtn.onclick     = addName;
-  nameInput.addEventListener("keydown", e=>{ if(e.key==="Enter") addName(); });
 
-  // رسم العجلة
+  // Wheel
   function drawWheel(){
     const W=wheelCanvas.width,H=wheelCanvas.height,cx=W/2,cy=H/2,r=Math.min(W,H)/2-12;
     ctx.clearRect(0,0,W,H);
@@ -183,7 +181,6 @@
     if(winner){ctx.fillStyle="var(--brown)";ctx.font="bold 16px system-ui";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText("🎉",cx,cy);}
   }
 
-  // دوران
   function spin(){
     if(names.length===0||spinning)return;
     const n=names.length,idx=Math.floor(Math.random()*n),anglePer=2*Math.PI/n,segmentCenter=idx*anglePer+anglePer/2;
@@ -203,7 +200,6 @@
   }
   spinBtn.onclick = spin;
 
-  // حذف الفائز من القاعدة
   removeWinnerBtn.onclick = async ()=>{
     if(!winner) return;
     const k = keyFromName(winner);
@@ -212,10 +208,6 @@
       winner=null; winnerBox.textContent=""; removeWinnerBtn.disabled=true;
     }catch(err){ alert("تعذّر الحذف: "+(err?.message||err)); }
   };
-
-  // فعّل زر حذف الفائز بعد اختيار فائز
-  const obs = new MutationObserver(()=>{ removeWinnerBtn.disabled = !winner; });
-  obs.observe(winnerBox, { childList:true, subtree:true });
 
   // أول رسم
   drawWheel();
