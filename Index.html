@@ -45,6 +45,7 @@
 </header>
 
 <main>
+  <!-- صفحة الهبوط: استقطاب أولاً -->
   <section id="landingPanel" class="card center">
     <h2>ابدأ الاستقطاب</h2>
     <div class="stack">
@@ -53,6 +54,7 @@
     </div>
   </section>
 
+  <!-- لوحة الاستقطاب -->
   <section id="capturePanel" class="card" style="display:none">
     <div class="row">
       <div class="col">
@@ -81,6 +83,7 @@
     </div>
   </section>
 
+  <!-- لوحة العجلة -->
   <section id="wheelPanel" class="card" style="display:none">
     <div class="row">
       <div class="col center">
@@ -103,6 +106,7 @@
     </div>
   </section>
 
+  <!-- واجهة الطالب -->
   <section id="joinPanel" class="card" style="display:none">
     <h2>انضمام إلى الجلسة <span id="joinSessionCode" class="pill"></span></h2>
     <label>اكتب اسمك كما تحب أن يظهر على العجلة</label>
@@ -112,13 +116,16 @@
   </section>
 </main>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<!-- QRCode -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
+<!-- Firebase v12 Modules -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-analytics.js";
   import { getDatabase, ref, onValue, set, remove } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-database.js";
 
+  // إعداداتك (مع databaseURL)
   const firebaseConfig = {
     apiKey: "AIzaSyD7sLHWDkGIZUAB4qNPMaBCq-bR1QMkr7U",
     authDomain: "fares-23426.firebaseapp.com",
@@ -131,10 +138,12 @@
   };
 
   const app = initializeApp(firebaseConfig);
-  let analytics=null;
-  try{ analytics=getAnalytics(app);}catch(e){console.warn("Analytics disabled:",e);}
+  // Analytics قد يفشل محليًا بدون HTTPS؛ نمنعه من كسر السكربت
+  let analytics = null;
+  try { analytics = getAnalytics(app); } catch (e) { console.warn("Analytics disabled:", e); }
   const db = getDatabase(app);
 
+  /* ========= عناصر DOM ========= */
   const $=s=>document.querySelector(s);
   const landingPanel=$("#landingPanel"),capturePanel=$("#capturePanel"),wheelPanel=$("#wheelPanel"),joinPanel=$("#joinPanel");
   const capSessionCode=$("#capSessionCode"),capJoinLink=$("#capJoinLink"),capQr=$("#capQr"),capNames=$("#capNames"),capCount=$("#capCount");
@@ -143,11 +152,19 @@
   const spinBtn=$("#spinBtn"),removeWinnerBtn=$("#removeWinnerBtn"),clearBtn=$("#clearBtn"),winnerBox=$("#winnerBox");
   const joinSessionCode=$("#joinSessionCode"),studentName=$("#studentName"),joinBtn=$("#joinBtn"),joinMsg=$("#joinMsg");
 
+  /* ========= حالة ========= */
   let sessionCode=null,names=[],winner=null,spinning=false,angularVel=0,targetAngle=0,wheelRotation=0;
-  const namesRef=c=>ref(db,`sessions/${c}/names`),metaRef=c=>ref(db,`sessions/${c}/meta`);
-  const keyFromName=n=>n.trim().toLowerCase().replace(/\s+/g,' ');
-  const makeCode=(l=6)=>Array.from({length:l},()=> "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[Math.floor(Math.random()*33)]).join('');
 
+  /* ========= Helpers ========= */
+  const namesRef=c=>ref(db,`sessions/${c}/names`);
+  const metaRef=c=>ref(db,`sessions/${c}/meta`);
+  const keyFromName=n=>n.trim().toLowerCase().replace(/\s+/g,' ');
+  const makeCode=(l=6)=>{
+    const chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    return Array.from({length:l},()=> chars[Math.floor(Math.random()*chars.length)]).join('');
+  };
+
+  /* ========= رسم العجلة ========= */
   function drawWheel(){
     const W=wheel.width,H=wheel.height,cx=W/2,cy=H/2,r=Math.min(W,H)/2-12;
     ctx.clearRect(0,0,W,H);
@@ -159,13 +176,16 @@
       const tint=i%3===0?'rgba(139,94,52,.18)':'rgba(30,58,138,.18)';
       ctx.fillStyle=`hsl(${(i*360/n)%360},70%,78%)`;ctx.fill();ctx.fillStyle=tint;ctx.fill();
       const mid=(s+e)/2,tx=cx+(r*0.6)*Math.cos(mid),ty=cy+(r*0.6)*Math.sin(mid);
-      ctx.save();ctx.translate(tx,ty);ctx.rotate(mid);ctx.fillStyle="#0f172a";ctx.font="15px system-ui";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(names[i]||"—",0,0);ctx.restore();
+      ctx.save();ctx.translate(tx,ty);ctx.rotate(mid);ctx.fillStyle="#0f172a";ctx.font="15px system-ui";
+      ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(names[i]||"—",0,0);ctx.restore();
     }
     ctx.beginPath();ctx.moveTo(cx+r+12,cy);ctx.lineTo(cx+r+42,cy-12);ctx.lineTo(cx+r+42,cy+12);ctx.closePath();ctx.fillStyle="var(--blue)";ctx.fill();
     ctx.beginPath();ctx.arc(cx,cy,34,0,2*Math.PI);ctx.fillStyle="#fff";ctx.fill();ctx.lineWidth=3;ctx.strokeStyle="rgba(139,94,52,.35)";ctx.stroke();
     if(winner){ctx.fillStyle="var(--brown)";ctx.font="bold 16px system-ui";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText("🎉",cx,cy);}
   }
+  drawWheel();
 
+  /* ========= دوران ========= */
   function spin(){
     if(names.length===0||spinning)return;
     const n=names.length,idx=Math.floor(Math.random()*n),anglePer=2*Math.PI/n,segmentCenter=idx*anglePer+anglePer/2;
@@ -184,14 +204,19 @@
     drawWheel();requestAnimationFrame(animate);
   }
 
+  /* ========= ربط قائمة الأسماء ========= */
   function bindNamesUI(listEl,countEl,enableBtns){
     return snap=>{
       const obj=snap.val()||{};names=Object.keys(obj).sort((a,b)=>a.localeCompare(b,'ar'));
-      listEl.innerHTML=names.map(n=>`<li>${n}</li>`).join("");countEl.textContent=names.length;
-      if(enableBtns)enableBtns(names.length>0);if(!spinning)drawWheel();
+      listEl.innerHTML=names.map(n=>`<li>${n}</li>`).join("");
+      countEl.textContent=names.length;
+      if(enableBtns)enableBtns(names.length>0);
+      if(!spinning)drawWheel();
     };
   }
 
+  /* ========= التدفق ========= */
+  // ابدأ الاستقطاب
   $("#startCaptureBtn").onclick=async()=>{
     try{
       sessionCode=makeCode();
@@ -202,27 +227,35 @@
       new QRCode(capQr,{text:url.toString(),width:180,height:180});
       onValue(namesRef(sessionCode),bindNamesUI(capNames,capCount,(has)=>{gotoWheelBtn.disabled=!has;capClearBtn.disabled=!has;}));
       landingPanel.style.display='none';capturePanel.style.display='block';
-    }catch(err){alert("تعذّر إنشاء الجلسة: "+err.message);}
+    }catch(err){alert("تعذّر إنشاء الجلسة: "+(err?.message||err));}
   };
 
+  // إلى العجلة
   gotoWheelBtn.onclick=()=>{
     onValue(namesRef(sessionCode),bindNamesUI(namesList,count,(has)=>{spinBtn.disabled=!has;clearBtn.disabled=!has;}));
     capturePanel.style.display='none';wheelPanel.style.display='block';
   };
+
+  // إدارة الأسماء
   capClearBtn.onclick=async()=>{if(sessionCode)await set(namesRef(sessionCode),null);};
   clearBtn.onclick=async()=>{if(sessionCode)await set(namesRef(sessionCode),null);winner=null;winnerBox.textContent="";removeWinnerBtn.disabled=true;};
   removeWinnerBtn.onclick=async()=>{if(!winner||!sessionCode)return;await remove(ref(db,`sessions/${sessionCode}/names/${keyFromName(winner)}`));winner=null;winnerBox.textContent="";removeWinnerBtn.disabled=true;};
   spinBtn.onclick=spin;
 
+  // واجهة الطالب
   function isJoinPage(){return new URLSearchParams(location.search).has('join');}
   function joinCode(){return new URLSearchParams(location.search).get('join');}
-  if(isJoinPage()){landingPanel.style.display='none';capturePanel.style.display='none';wheelPanel.style.display='none';joinPanel.style.display='block';joinSessionCode.textContent=joinCode();}
+  if(isJoinPage()){
+    landingPanel.style.display='none';capturePanel.style.display='none';wheelPanel.style.display='none';joinPanel.style.display='block';
+    joinSessionCode.textContent=joinCode();
+  }
   joinBtn.onclick=async()=>{
     const code=joinCode(),name=studentName.value.trim();
     if(!name){joinMsg.textContent="رجاءً اكتب اسمك.";return;}
     await set(ref(db,`sessions/${code}/names/${keyFromName(name)}`),true);
     joinMsg.textContent="تم تسجيل اسمك ✔️. يمكنك إغلاق الصفحة.";studentName.value="";
   };
+
   window.addEventListener('resize',drawWheel);
 </script>
 </body>
