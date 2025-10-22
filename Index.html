@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>عجلة اختيار اسم - ورشة TGD</title>
+<style>
+  :root{
+    --blue:#1e3a8a;    /* أزرق عميق */
+    --blue-100:#e8eefc;/* تينت أزرق فاتح */
+    --brown:#8b5e34;   /* بني حديث */
+    --ink:#0f172a;     /* نص داكن */
+    --muted:#64748b;   /* نص خافت */
+    --bg:#f7f8fb;      /* خلفية بيضاء مائلة */
+    --card:#ffffff;    /* بطاقة */
+  }
+  *{box-sizing:border-box}
+  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0;background:var(--bg);color:var(--ink)}
+  header{
+    background:linear-gradient(135deg,var(--blue) 0%, #2b4ab6 60%, var(--blue-100) 120%);
+    color:#fff;padding:20px
+  }
+  .brand{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .brand h1{margin:0;font-size:20px;font-weight:800;letter-spacing:.3px}
+  .tag{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.25);padding:4px 10px;border-radius:999px;font-size:12px}
+  .welcome{
+    margin-top:8px;background:#fff1;border-left:4px solid #fff8;padding:8px 12px;border-radius:8px;backdrop-filter: blur(3px)
+  }
+  main{max-width:1100px;margin:22px auto;padding:0 16px}
+  .card{background:var(--card);border-radius:14px;box-shadow:0 10px 30px rgba(16,24,40,.06);padding:16px;margin-bottom:16px}
+  .row{display:flex;gap:16px;flex-wrap:wrap}
+  .col{flex:1;min-width:290px}
+  h2{margin:6px 0 12px;font-size:18px}
+  label{display:block;margin:8px 0 4px}
+  input[type=text]{width:100%;padding:12px;border:1px solid #e2e8f0;border-radius:10px}
+  button{
+    cursor:pointer;border:0;border-radius:12px;padding:11px 14px;font-weight:700;
+    background:var(--blue);color:#fff;transition:.15s transform ease,.2s opacity ease
+  }
+  button:hover{transform:translateY(-1px)}
+  button.secondary{background:#eaeaea;color:#222}
+  button.danger{background:#ef4444}
+  .muted{color:var(--muted);font-size:13px}
+  .pill{display:inline-block;background:var(--blue-100);color:var(--blue);border:1px solid #c7d2fe;border-radius:999px;padding:4px 10px;font-size:12px}
+  .badge{font-size:12px;background:var(--brown);color:#fff;border-radius:6px;padding:3px 8px}
+  canvas{width:100%;max-width:520px;aspect-ratio:1/1;background:#fff;border-radius:50%;display:block;margin:auto;border:8px solid #fff;box-shadow:0 6px 20px rgba(0,0,0,.08)}
+  ul{list-style:none;padding:0;margin:8px 0}
+  li{padding:8px 10px;border-bottom:1px dashed #eee}
+  .qr{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .qr-box{width:170px;height:170px;border:2px dashed #cbd5e1;border-radius:14px;display:flex;align-items:center;justify-content:center;background:#fff}
+  .accent{color:var(--brown)}
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+  .stat{display:flex;align-items:center;gap:8px}
+  .stat-dot{width:8px;height:8px;border-radius:50%;background:var(--blue)}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <h1>أهلاً بكم <span class="accent">بورشة TGD</span></h1>
+    <span class="tag">عجلة اختيار اسم • QR</span>
+  </div>
+  <div class="welcome">اكتب اسمك عبر الرابط/الـQR لتدخل السحبة مباشرة. الألوان: أزرق × بني × أبيض بطابع حديث.</div>
+</header>
+
+<main>
+  <!-- لوحة المدرّس -->
+  <div class="card" id="hostPanel">
+    <div class="row">
+      <div class="col">
+        <h2>1) أنشئ جلسة</h2>
+        <div class="toolbar" style="justify-content:flex-start">
+          <button id="createSessionBtn">إنشاء جلسة جديدة</button>
+          <span class="pill" id="sessionCodePill" style="display:none"></span>
+        </div>
+        <p class="muted" id="hostHint" style="display:none;margin-top:6px">اعرض QR أو أرسل الرابط للطلاب.</p>
+        <div class="qr" id="joinArea" style="display:none;margin-top:10px">
+          <div class="qr-box" id="qrcode"></div>
+          <div>
+            <div><strong>رابط الانضمام:</strong></div>
+            <div id="joinLink" style="word-break:break-all;margin:6px 0"></div>
+            <div class="muted">امسح QR أو افتح الرابط، اكتب اسمك، وخلاص ✨</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col" style="text-align:center">
+        <h2>2) العجلة</h2>
+        <canvas id="wheel" width="520" height="520"></canvas>
+        <div class="toolbar" style="margin-top:10px">
+          <button id="spinBtn" disabled>دَوِّر العجلة</button>
+          <button id="removeWinnerBtn" class="secondary" disabled>احذف الفائز</button>
+          <button id="clearBtn" class="danger" disabled>حذف الأسماء</button>
+        </div>
+        <div id="winnerBox" class="muted" style="margin-top:8px"></div>
+      </div>
+
+      <div class="col">
+        <h2>3) الأسماء</h2>
+        <div class="stat"><span class="stat-dot"></span> <span class="muted">المسجّلون:</span> <strong id="count">0</strong></div>
+        <ul id="namesList"></ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- لوحة الطالب -->
+  <div class="card" id="joinPanel" style="display:none">
+    <h2>انضمام إلى الجلسة <span id="joinSessionCode" class="pill"></span></h2>
+    <label>اكتب اسمك كما تحب أن يظهر على العجلة</label>
+    <input type="text" id="studentName" placeholder="مثال: أحمد خالد" />
+    <div class="toolbar" style="justify-content:flex-start;margin-top:8px">
+      <button id="joinBtn">إرسال الاسم</button>
+    </div>
+    <p class="muted" id="joinMsg" style="margin-top:6px"></p>
+  </div>
+</main>
+
+<!-- QRCode (non-module) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<!-- Firebase v12 Modules -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-analytics.js";
+  import { getDatabase, ref, onValue, set, remove } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-database.js";
+
+  // إعداداتك (أضفت databaseURL لقاعدة RTDB)
+  const firebaseConfig = {
+    apiKey: "AIzaSyD7sLHWDkGIZUAB4qNPMaBCq-bR1QMkr7U",
+    authDomain: "fares-23426.firebaseapp.com",
+    projectId: "fares-23426",
+    storageBucket: "fares-23426.firebasestorage.app",
+    messagingSenderId: "369109244141",
+    appId: "1:369109244141:web:5d6de927469bbcc37494e4",
+    measurementId: "G-27E3L0R453",
+    databaseURL: "https://fares-23426-default-rtdb.firebaseio.com"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  getAnalytics(app);
+  const db = getDatabase(app);
+
+  /* ====== عناصر DOM ====== */
+  const $ = s => document.querySelector(s);
+  const namesListEl = $("#namesList");
+  const countEl = $("#count");
+  const wheelCanvas = $("#wheel");
+  const ctx = wheelCanvas.getContext("2d");
+  let sessionCode = null;
+  let names = [];
+  let winner = null;
+
+  /* أكواد مساعدة */
+  function makeCode(len=6){
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    let s=""; for(let i=0;i<len;i++) s += chars[Math.floor(Math.random()*chars.length)];
+    return s;
+  }
+  function keyFromName(name){
+    return name.trim().toLowerCase().replace(/\s+/g,' ');
+  }
+  const namesRef = code => ref(db, `sessions/${code}/names`);
+  const metaRef  = code => ref(db, `sessions/${code}/meta`);
+
+  /* رسم العجلة */
+  let wheelRotation = 0;
+  function drawWheel(){
+    const W = wheelCanvas.width, H = wheelCanvas.height;
+    const cx = W/2, cy = H/2, r = Math.min(W,H)/2 - 12;
+    ctx.clearRect(0,0,W,H);
+
+    // إطار خارجي بنّي خفيف
+    ctx.beginPath(); ctx.arc(cx,cy,r+10,0,2*Math.PI);
+    ctx.strokeStyle="rgba(139,94,52,.25)"; ctx.lineWidth=8; ctx.stroke();
+
+    const n = Math.max(names.length, 1);
+    const angle = 2*Math.PI / n;
+
+    for(let i=0;i<n;i++){
+      const start = i*angle + wheelRotation;
+      const end   = start + angle;
+      ctx.beginPath();
+      ctx.moveTo(cx,cy);
+      ctx.arc(cx,cy,r,start,end);
+      ctx.closePath();
+      // شرائح متدرجة (أزرق/بني/أبيض)
+      const hue = (i*360/n)%360;
+      // نضبط التلوين نحو الأزرق، مع لمسة بنية عبر المزج
+      const mix = i%3===0 ? 'rgba(139,94,52,.15)' : 'rgba(30,58,138,.15)';
+      ctx.fillStyle = `hsl(${hue}, 70%, 78%)`;
+      ctx.fill();
+      // طبقة شفافة خفيفة لإحساس الثيم
+      ctx.fillStyle = mix;
+      ctx.fill();
+
+      // نص
+      const mid = (start+end)/2;
+      const tx = cx + (r*0.6)*Math.cos(mid);
+      const ty = cy + (r*0.6)*Math.sin(mid);
+      ctx.save();
+      ctx.translate(tx,ty);
+      ctx.rotate(mid);
+      ctx.fillStyle="#0f172a";
+      ctx.font="15px system-ui, -apple-system, Segoe UI, Arial";
+      const label = names[i] || "—";
+      ctx.textAlign="center"; ctx.textBaseline="middle";
+      ctx.fillText(label,0,0);
+      ctx.restore();
+    }
+
+    // المؤشر (مثلث أزرق)
+    ctx.beginPath();
+    ctx.moveTo(cx + r + 12, cy);
+    ctx.lineTo(cx + r + 42, cy - 12);
+    ctx.lineTo(cx + r + 42, cy + 12);
+    ctx.closePath();
+    ctx.fillStyle="var(--blue)"; ctx.fill();
+
+    // وسط أبيض بحواف بنية
+    ctx.beginPath(); ctx.arc(cx,cy,34,0,2*Math.PI); ctx.fillStyle="#fff"; ctx.fill();
+    ctx.lineWidth=3; ctx.strokeStyle="rgba(139,94,52,.35)"; ctx.stroke();
+
+    if(winner){
+      ctx.fillStyle="var(--brown)";
+      ctx.font="bold 16px system-ui,-apple-system,Segoe UI,Arial";
+      ctx.textAlign="center"; ctx.textBaseline="middle";
+      ctx.fillText("🎉", cx, cy);
+    }
+  }
+  drawWheel();
+
+  /* أنيميشن الدوران */
+  let spinning=false, angularVel=0, targetAngle=0;
+  function spin(){
+    if(names.length===0 || spinning) return;
+    const n = names.length;
+    const idx = Math.floor(Math.random() * n);
+    const anglePer = 2*Math.PI / n;
+    const segmentCenter = idx * anglePer + anglePer/2;
+    const laps = 4 + Math.floor(Math.random()*2);
+    targetAngle = (2*Math.PI*laps) + (2*Math.PI - segmentCenter) - (wheelRotation % (2*Math.PI));
+    angularVel = (Math.random()*0.25)+0.35;
+    spinning = true; winner=null;
+    $("#winnerBox").textContent = "جاري الدوران...";
+    animate();
+  }
+  function animate(){
+    if(!spinning){ drawWheel(); return; }
+    const decel = 0.004;
+    wheelRotation += angularVel;
+    angularVel = Math.max(0.01, angularVel - decel);
+    if(angularVel <= 0.012){
+      spinning = false;
+      // اضبط النهاية تمامًا على الهدف
+      wheelRotation += (targetAngle - (wheelRotation % (2*Math.PI)));
+      const n = names.length;
+      const anglePer = 2*Math.PI / n;
+      const at = (2*Math.PI - (wheelRotation % (2*Math.PI))) % (2*Math.PI);
+      const idx = Math.floor(((at + anglePer/2) % (2*Math.PI)) / anglePer);
+      winner = names[idx] || null;
+      drawWheel();
+      $("#winnerBox").innerHTML = winner ? `الفائز: <strong>${winner}</strong>` : "";
+      $("#removeWinnerBtn").disabled = !winner;
+      return;
+    }
+    drawWheel();
+    requestAnimationFrame(animate);
+  }
+
+  /* متابعة الأسماء */
+  let unsub = null;
+  function watchNames(code){
+    if(unsub) { unsub(); unsub=null; }
+    const r = namesRef(code);
+    const handler = snap=>{
+      const obj = snap.val() || {};
+      names = Object.keys(obj).sort((a,b)=>a.localeCompare(b,'ar'));
+      namesListEl.innerHTML = names.map(n=>`<li>${n}</li>`).join("");
+      countEl.textContent = String(names.length);
+      $("#spinBtn").disabled = names.length===0;
+      $("#clearBtn").disabled = names.length===0;
+      if(!spinning) drawWheel();
+    };
+    onValue(r, handler);
+    unsub = ()=>{ /* لا إلغاء سهل في v12 للـ onValue إلا بإزالة المستمع عبر ref جديد؛ نكتفي بهذا للسياق البسيط */ };
+  }
+
+  /* إنشاء جلسة */
+  $("#createSessionBtn").onclick = async ()=>{
+    sessionCode = makeCode();
+    await set(metaRef(sessionCode), { createdAt: Date.now() });
+
+    watchNames(sessionCode);
+
+    $("#sessionCodePill").style.display='inline-block';
+    $("#sessionCodePill").textContent = `الكود: ${sessionCode}`;
+    $("#hostHint").style.display='block';
+    $("#joinArea").style.display='flex';
+
+    const url = new URL(window.location.href);
+    url.searchParams.set('join', sessionCode);
+    $("#joinLink").textContent = url.toString();
+
+    const qrDiv = $("#qrcode");
+    qrDiv.innerHTML = "";
+    new QRCode(qrDiv, { text: url.toString(), width: 170, height: 170 });
+
+    $("#spinBtn").disabled = true;
+    $("#clearBtn").disabled = true;
+    $("#removeWinnerBtn").disabled = true;
+  };
+
+  /* أزرار التحكم */
+  $("#spinBtn").onclick = spin;
+  $("#removeWinnerBtn").onclick = async ()=>{
+    if(!winner || !sessionCode) return;
+    await remove(ref(db, `sessions/${sessionCode}/names/${keyFromName(winner)}`));
+    winner = null; $("#winnerBox").textContent = "";
+    $("#removeWinnerBtn").disabled = true;
+  };
+  $("#clearBtn").onclick = async ()=>{
+    if(!sessionCode) return;
+    await set(namesRef(sessionCode), null);
+    winner = null; $("#winnerBox").textContent = "";
+    $("#removeWinnerBtn").disabled = true;
+  };
+
+  /* واجهة الطالب */
+  function isJoinPage(){ return new URLSearchParams(location.search).has('join'); }
+  function joinCode(){ return new URLSearchParams(location.search).get('join'); }
+
+  if(isJoinPage()){
+    $("#hostPanel").style.display='none';
+    $("#joinPanel").style.display='block';
+    $("#joinSessionCode").textContent = joinCode();
+  }
+
+  $("#joinBtn").onclick = async ()=>{
+    const code = joinCode();
+    const name = $("#studentName").value.trim();
+    if(!name){ $("#joinMsg").textContent = "رجاءً اكتب اسمك."; return; }
+    const k = keyFromName(name);
+    await set(ref(db, `sessions/${code}/names/${k}`), true);
+    $("#joinMsg").textContent = "تم تسجيل اسمك ✔️. يمكنك إغلاق الصفحة.";
+    $("#studentName").value = "";
+  };
+
+  window.addEventListener('resize', ()=>drawWheel());
+</script>
+</body>
+</html>
